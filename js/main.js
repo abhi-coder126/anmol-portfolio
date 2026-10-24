@@ -60,40 +60,34 @@
         $('.client-testimonials__grid').owlCarousel({ loop: true, autoplay: true, autoplayTimeout: 3200, autoplayHoverPause: true, smartSpeed: 900, dots: true, nav: false, margin: 18, responsive: { 0: { items: 1 }, 768: { items: 2 }, 1100: { items: 3 } } });
     }
 
-    // Load the user's real work videos and classify landscape/reel format automatically.
+    // Work videos hosted on Google Drive — thumbnail shown in gallery, Drive player opens on click.
     var workVideos = [
-        'agrwal properties 3rd shoot video .mp4', 'Gold Medal SCUKR .mp4',
-        'insurance lena asan hai Shi aadvisor Milna Mushkil .mp4', 'Next hope health checkup camp .mov',
-        'Orange Naoughty Rituals .mov', 'RED KHAWAISH.mov', 'short marketing film.mov',
-        'Tredixo GS  EDIT .mp4', 'Tredixo Trading Guide .mov', 'Tulip FS Episode 1.mp4'
+        { id: '1WC7bhobWfIYTPoB80jfwUnNTCw3RB58p', label: 'Agrwal Properties',              landscape: false },
+        { id: '1zP90Kuj2PN8BrsbILd-QvzLG9v03onyX', label: 'Gold Medal SCUKR',               landscape: true  },
+        { id: '1nRCRXAR7ScyO4_8zJa1xHvw3SzXXPjZh', label: 'Insurance — Shi Advisor',        landscape: true  },
+        { id: '1c7gNZ2LAqvIGt9qdM0aj-VTHsz39y8rg', label: 'Next Hope Health Camp',          landscape: true  },
+        { id: '1DhxBkhZSyDZFBXA-DXB0ZFqPqksiuS3P', label: 'Orange Naughty Rituals',         landscape: false },
+        { id: '1sQzi5Irdspiumts0qY5_VOMaesv5aBcZ',  label: 'RED KHAWAISH',                   landscape: false },
+        { id: '1ZucWHdyRDlUCHKO-ydIaSvz-HNj6fPWm', label: 'Short Marketing Film',           landscape: true  },
+        { id: '1tsyWZgGSu5FwLj7oG9jOyJ2BYLvcFNBJ', label: 'Tredixo GS Edit',               landscape: true  },
+        { id: '1CZxpqZwnrKT1sCPSbg3m4vV7-CD0pcF3', label: 'Tredixo Trading Guide',          landscape: true  },
+        { id: '1LK0WDwBhLNY3rTYMoBRgEs14zJwzTiwh', label: 'Tulip FS Episode 1',             landscape: true  }
     ];
+
+    function driveThumb(id) { return 'https://drive.google.com/thumbnail?id=' + id + '&sz=w800'; }
+    function driveEmbed(id) { return 'https://drive.google.com/file/d/' + id + '/preview'; }
+
     if ($('.work__gallery').length && workVideos.length) {
         var gallery = $('.work__gallery');
-        gallery.find('.grid-sizer').remove().addClass('work-scroller');
-        workVideos.forEach(function (file, index) {
-            var src = 'work/' + encodeURIComponent(file).replace(/%2F/g, '/');
-            var forceLandscape = file === 'short marketing film.mov' || file === 'Next hope healthcheckup camp .mov' || file === 'Next hope health checkup camp .mov';
-            var card = $('<button type="button" class="work__item video-work-item' + (forceLandscape ? ' is-landscape forced-landscape' : '') + '" aria-label="Open project video ' + (index + 1) + '"><video muted autoplay loop playsinline preload="metadata"><source src="' + src + '"></video><span class="work-card-ui"><small>Project ' + String(index + 1).padStart(2, '0') + '</small><i class="fa fa-expand"></i></span></button>');
+        gallery.find('.grid-sizer').remove();
+        workVideos.forEach(function (v, index) {
+            var card = $('<button type="button" class="work__item video-work-item' + (v.landscape ? ' is-landscape' : ' is-reel') + '" aria-label="Open ' + v.label + '"><img src="' + driveThumb(v.id) + '" alt="' + v.label + '" loading="lazy"><span class="work-card-ui"><small>Project ' + String(index + 1).padStart(2, '0') + '</small><i class="fa fa-play"></i></span></button>');
             gallery.append(card);
-            var video = card.find('video')[0];
-            video.src = src;
-            video.load();
-            video.addEventListener('loadedmetadata', function () {
-                var detectedLandscape = video.videoWidth >= video.videoHeight;
-                card.toggleClass('is-landscape', forceLandscape || detectedLandscape).toggleClass('is-reel', !forceLandscape && video.videoHeight > video.videoWidth);
-            });
-            video.addEventListener('error', function () { card.addClass('video-load-error').find('.work-card-ui small').text('Video unavailable'); });
-            var startMutedLoop = function () { video.muted = true; var started = video.play(); if (started) started.catch(function () {}); };
-            card.on('mouseenter focus', startMutedLoop);
-            startMutedLoop();
         });
 
-        // Turn the work reel into a visible 3D rotating carousel.
         gallery.removeClass('work-scroller').addClass('work-scroller work-3d-carousel');
         var carouselCards = gallery.find('.video-work-item');
         var activeCarouselIndex = 0;
-        var cardSrcs = [];
-        carouselCards.each(function (i) { cardSrcs[i] = $(this).find('video')[0].src; });
 
         function renderWorkCarousel() {
             var total = carouselCards.length;
@@ -101,31 +95,60 @@
             var isMobile = window.innerWidth < 768;
             var spacing = isMobile ? Math.round(window.innerWidth * 0.52) : 240;
             var maxVisible = isMobile ? 1 : 2;
+            // Use gallery's actual pixel center so cards always sit in the middle
             carouselCards.each(function (cardIndex) {
                 var offset = (cardIndex - activeCarouselIndex + total) % total;
                 if (offset > center) offset -= total;
                 var visible = Math.abs(offset) <= maxVisible;
                 var scale = offset === 0 ? 1 : (Math.abs(offset) === 1 ? (isMobile ? .72 : .84) : .68);
+                var cardW = $(this).outerWidth() || (isMobile ? 245 : 340);
+                // Anchor every card to the gallery's 50% point. This keeps the
+                // active card centered even when the gallery has a max-width.
                 var x = offset * spacing;
                 var tz = -Math.abs(offset) * (isMobile ? 60 : 120);
                 var ry = offset * -20;
                 var brightness = offset === 0 ? 1 : (Math.abs(offset) === 1 ? (isMobile ? 0.45 : 0.65) : 0.4);
                 $(this).css({
-                    transform: 'translateX(calc(-50% + ' + x + 'px)) translateZ(' + tz + 'px) rotateY(' + ry + 'deg) scale(' + scale + ')',
+                    transform: 'translateX(' + x + 'px) translateZ(' + tz + 'px) rotateY(' + ry + 'deg) scale(' + scale + ')',
                     opacity: visible ? 1 : 0,
                     zIndex: 20 - Math.abs(offset),
                     pointerEvents: visible ? 'auto' : 'none',
-                    filter: 'brightness(' + brightness + ')'
+                    filter: 'brightness(' + brightness + ')',
+                    left: '50vw',
+                    marginLeft: (-cardW / 2) + 'px'
                 }).toggleClass('is-active', offset === 0);
             });
         }
-        $(window).on('resize', function () { renderWorkCarousel(); });
+        $(window).on('resize', renderWorkCarousel);
 
-        // Click: side card → move to center; center card → open modal
+        var modal = $('<div class="work-video-modal" aria-hidden="true"><div class="work-video-modal__backdrop"></div><div class="work-video-modal__panel" role="dialog" aria-modal="true" aria-label="Project video"><button type="button" class="work-video-modal__close" aria-label="Close video"><i class="fa fa-times"></i></button><iframe allowfullscreen allow="autoplay"></iframe><div class="work-video-modal__meta"><span>Now playing</span><b>Project video</b><span class="modal-next-hint"></span></div><div class="modal-nav-btns"><button class="modal-prev-btn" aria-label="Previous"><i class="fa fa-chevron-left"></i></button><button class="modal-next-btn" aria-label="Next"><i class="fa fa-chevron-right"></i></button></div></div></div>');
+        $('body').append(modal);
+        var modalIframe = modal.find('iframe')[0];
+        var currentModalIndex = 0;
+
+        function openWorkVideo(index) {
+            currentModalIndex = index;
+            modalIframe.src = driveEmbed(workVideos[index].id);
+            modal.attr('aria-hidden', 'false').addClass('is-open');
+            $('body').addClass('video-modal-open');
+            modal.find('.work-video-modal__meta b').text(workVideos[index].label + ' — ' + String(index + 1).padStart(2, '0') + ' / ' + workVideos.length);
+            var nextIdx = (index + 1) % workVideos.length;
+            modal.find('.modal-next-hint').text('Next: ' + workVideos[nextIdx].label);
+            activeCarouselIndex = index;
+            renderWorkCarousel();
+            modal.find('.work-video-modal__close').trigger('focus');
+        }
+
+        function closeWorkVideo() {
+            modal.removeClass('is-open').attr('aria-hidden', 'true');
+            modalIframe.src = '';
+            $('body').removeClass('video-modal-open');
+        }
+
         carouselCards.each(function (cardIndex) {
             $(this).on('click', function () {
                 if ($(this).hasClass('is-active')) {
-                    openWorkVideo(cardSrcs[cardIndex], cardIndex);
+                    openWorkVideo(cardIndex);
                 } else {
                     activeCarouselIndex = cardIndex;
                     clearInterval(carouselTimer);
@@ -138,10 +161,9 @@
         renderWorkCarousel();
         var carouselTimer = setInterval(function () { activeCarouselIndex = (activeCarouselIndex + 1) % carouselCards.length; renderWorkCarousel(); }, 4200);
 
-        // Desktop: wheel to navigate (horizontal scroll only, don't block vertical page scroll)
         gallery[0].addEventListener('wheel', function (e) {
             var absX = Math.abs(e.deltaX), absY = Math.abs(e.deltaY);
-            if (absX < 8 && absY > absX) return; // vertical scroll — let page scroll
+            if (absX < 8 && absY > absX) return;
             e.preventDefault();
             clearInterval(carouselTimer);
             activeCarouselIndex = (activeCarouselIndex + (e.deltaX > 0 || e.deltaY > 0 ? 1 : -1) + carouselCards.length) % carouselCards.length;
@@ -149,24 +171,17 @@
             carouselTimer = setInterval(function () { activeCarouselIndex = (activeCarouselIndex + 1) % carouselCards.length; renderWorkCarousel(); }, 4200);
         }, { passive: false });
 
-        // Mobile: touch swipe left/right to navigate
         var touchStartX = 0, touchStartY = 0, swipeLocked = false;
-        gallery[0].addEventListener('touchstart', function (e) {
-            touchStartX = e.touches[0].clientX;
-            touchStartY = e.touches[0].clientY;
-            swipeLocked = false;
-        }, { passive: true });
+        gallery[0].addEventListener('touchstart', function (e) { touchStartX = e.touches[0].clientX; touchStartY = e.touches[0].clientY; swipeLocked = false; }, { passive: true });
         gallery[0].addEventListener('touchmove', function (e) {
-            var dx = e.touches[0].clientX - touchStartX;
-            var dy = e.touches[0].clientY - touchStartY;
+            var dx = e.touches[0].clientX - touchStartX, dy = e.touches[0].clientY - touchStartY;
             if (!swipeLocked) {
-                if (Math.abs(dy) > Math.abs(dx) + 6) { swipeLocked = true; return; } // vertical — let page scroll
+                if (Math.abs(dy) > Math.abs(dx) + 6) { swipeLocked = true; return; }
                 if (Math.abs(dx) > 12) { swipeLocked = true; e.preventDefault(); }
             } else if (Math.abs(dy) > Math.abs(dx)) { return; } else { e.preventDefault(); }
         }, { passive: false });
         gallery[0].addEventListener('touchend', function (e) {
-            var dx = e.changedTouches[0].clientX - touchStartX;
-            var dy = e.changedTouches[0].clientY - touchStartY;
+            var dx = e.changedTouches[0].clientX - touchStartX, dy = e.changedTouches[0].clientY - touchStartY;
             if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
                 clearInterval(carouselTimer);
                 activeCarouselIndex = (activeCarouselIndex + (dx < 0 ? 1 : -1) + carouselCards.length) % carouselCards.length;
@@ -177,88 +192,34 @@
 
         gallery.on('mouseenter', function () { clearInterval(carouselTimer); }).on('mouseleave', function () { carouselTimer = setInterval(function () { activeCarouselIndex = (activeCarouselIndex + 1) % carouselCards.length; renderWorkCarousel(); }, 4200); });
 
-        var modal = $('<div class="work-video-modal" aria-hidden="true"><div class="work-video-modal__backdrop"></div><div class="work-video-modal__panel" role="dialog" aria-modal="true" aria-label="Project video"><button type="button" class="work-video-modal__close" aria-label="Close video"><i class="fa fa-times"></i></button><video controls playsinline></video><div class="work-video-modal__meta"><span>Now playing</span><b>Project video</b><span class="modal-next-hint"></span></div><div class="modal-nav-btns"><button class="modal-prev-btn" aria-label="Previous"><i class="fa fa-chevron-left"></i></button><button class="modal-next-btn" aria-label="Next"><i class="fa fa-chevron-right"></i></button></div></div></div>');
-        $('body').append(modal);
-        var modalVideo = modal.find('video')[0];
-        var currentModalIndex = 0;
-
-        function openWorkVideo(src, index) {
-            currentModalIndex = index;
-            modalVideo.src = src;
-            modalVideo.muted = false;
-            modal.attr('aria-hidden', 'false').addClass('is-open');
-            $('body').addClass('video-modal-open');
-            modal.find('.work-video-modal__meta b').text('Project ' + String(index + 1).padStart(2, '0') + ' / ' + cardSrcs.length);
-            var nextIdx = (index + 1) % cardSrcs.length;
-            modal.find('.modal-next-hint').text('Next: Project ' + String(nextIdx + 1).padStart(2, '0'));
-            // update carousel center
-            activeCarouselIndex = index;
-            renderWorkCarousel();
-            var playing = modalVideo.play();
-            if (playing) playing.catch(function () { modalVideo.muted = true; modalVideo.play(); });
-            modal.find('.work-video-modal__close').trigger('focus');
-        }
-
-        // Auto-advance to next video when current ends
-        modalVideo.addEventListener('ended', function () {
-            var nextIdx = (currentModalIndex + 1) % cardSrcs.length;
-            openWorkVideo(cardSrcs[nextIdx], nextIdx);
-        });
-
-        function closeWorkVideo() {
-            modal.removeClass('is-open').attr('aria-hidden', 'true');
-            modalVideo.pause();
-            modalVideo.removeAttribute('src');
-            modalVideo.load();
-            $('body').removeClass('video-modal-open');
-        }
         modal.on('click', '.work-video-modal__close, .work-video-modal__backdrop', closeWorkVideo);
-        modal.on('click', '.modal-next-btn', function () {
-            var nextIdx = (currentModalIndex + 1) % cardSrcs.length;
-            openWorkVideo(cardSrcs[nextIdx], nextIdx);
-        });
-        modal.on('click', '.modal-prev-btn', function () {
-            var prevIdx = (currentModalIndex - 1 + cardSrcs.length) % cardSrcs.length;
-            openWorkVideo(cardSrcs[prevIdx], prevIdx);
-        });
-        $(document).on('keydown.workVideoModal', function (event) {
+        modal.on('click', '.modal-next-btn', function () { openWorkVideo((currentModalIndex + 1) % workVideos.length); });
+        modal.on('click', '.modal-prev-btn', function () { openWorkVideo((currentModalIndex - 1 + workVideos.length) % workVideos.length); });
+        $(document).on('keydown.workVideoModal', function (e) {
             if (!modal.hasClass('is-open')) return;
-            if (event.key === 'Escape') closeWorkVideo();
-            if (event.key === 'ArrowRight') { var n = (currentModalIndex + 1) % cardSrcs.length; openWorkVideo(cardSrcs[n], n); }
-            if (event.key === 'ArrowLeft') { var p = (currentModalIndex - 1 + cardSrcs.length) % cardSrcs.length; openWorkVideo(cardSrcs[p], p); }
+            if (e.key === 'Escape') closeWorkVideo();
+            if (e.key === 'ArrowRight') openWorkVideo((currentModalIndex + 1) % workVideos.length);
+            if (e.key === 'ArrowLeft') openWorkVideo((currentModalIndex - 1 + workVideos.length) % workVideos.length);
         });
     }
 
-    // Reuse the same real videos inside the dedicated Portfolio page.
+    // Portfolio page — Drive thumbnails with click-to-embed.
     if ($('.portfolio__item__video').length && workVideos.length) {
         $('.portfolio__item__video').each(function (index) {
-            var file = workVideos[index % workVideos.length];
-            var src = 'work/' + encodeURIComponent(file).replace(/%2F/g, '/');
+            var v = workVideos[index % workVideos.length];
             var box = $(this);
-            box.css('background-image', 'none').removeAttr('data-setbg').addClass('portfolio-video-box');
-            box.find('video').remove();
-            box.prepend('<video muted loop playsinline preload="metadata"><source src="' + src + '"></video>');
-            var video = box.find('video')[0];
-            box.on('mouseenter', function () { video.muted = false; var started = video.play(); if (started) started.catch(function () { video.muted = true; }); });
-            box.on('mouseleave', function () { video.pause(); video.currentTime = 0; });
+            box.css('background-image', 'url(' + driveThumb(v.id) + ')').addClass('portfolio-video-box');
+            box.on('click', function () { window.open('https://drive.google.com/file/d/' + v.id + '/view', '_blank'); });
         });
     }
 
-    // Make the Portfolio page use the exact same video gallery UI as Home.
     if ($('.portfolio__gallery').length && workVideos.length) {
         var portfolioGallery = $('.portfolio__gallery');
         portfolioGallery.removeClass('row portfolio__gallery').addClass('work__gallery portfolio-work-gallery').empty().append('<div class="grid-sizer"></div>');
-        workVideos.forEach(function (file, index) {
-            var src = 'work/' + encodeURIComponent(file).replace(/%2F/g, '/');
-            var forceLandscape = file === 'short marketing film.mov' || file === 'Next hope health checkup camp .mov';
-            var card = $('<div class="work__item video-work-item' + (forceLandscape ? ' is-landscape forced-landscape' : '') + '"><video loop playsinline preload="metadata"><source src="' + src + '"></video></div>');
+        workVideos.forEach(function (v, index) {
+            var card = $('<div class="work__item video-work-item' + (v.landscape ? ' is-landscape' : ' is-reel') + '"><img src="' + driveThumb(v.id) + '" alt="' + v.label + '" loading="lazy"><span class="work-card-ui"><small>' + v.label + '</small><i class="fa fa-play"></i></span></div>');
             portfolioGallery.append(card);
-            var video = card.find('video')[0];
-            video.addEventListener('loadedmetadata', function () {
-                var landscape = video.videoWidth >= video.videoHeight;
-                card.toggleClass('is-landscape', forceLandscape || landscape).toggleClass('is-reel', !forceLandscape && !landscape);
-            });
-            card.on('mouseenter', function () { video.muted = false; var started = video.play(); if (started) started.catch(function () { video.muted = true; }); }).on('mouseleave', function () { video.pause(); video.currentTime = 0; });
+            card.on('click', function () { window.open('https://drive.google.com/file/d/' + v.id + '/view', '_blank'); });
         });
         portfolioGallery.masonry({ itemSelector: '.work__item', columnWidth: '.grid-sizer', gutter: 10 });
         $('.portfolio__filter').remove();
