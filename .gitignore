@@ -3,6 +3,7 @@ work/
 Source/
 public/reels/*.mp4
 public/reels/*.mov
+!public/reels/*-github.mp4
 # build output
 dist/
 .output/
