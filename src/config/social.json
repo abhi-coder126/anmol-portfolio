@@ -1,0 +1,14 @@
+{
+  "main": [
+    {
+      "name": "instagram",
+      "icon": "FaInstagram",
+      "link": "https://www.instagram.com/fluxer_motion_09"
+    },
+    {
+      "name": "whatsapp",
+      "icon": "FaWhatsapp",
+      "link": "https://wa.me/919816480267"
+    }
+  ]
+}

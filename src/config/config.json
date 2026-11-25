@@ -1,0 +1,39 @@
+{
+  "site": {
+    "title": "Anmol Sharma",
+    "base_url": "",
+    "base_path": "/",
+    "trailing_slash": false,
+    "favicon": "/images/favicon.png",
+    "logo": "/images/Fluxer-motion.png",
+    "logo_width": "150",
+    "logo_height": "72",
+    "logo_text": "ANMOL SHARMA"
+  },
+  "settings": {
+    "sticky_header": true
+  },
+  "params": {
+    "contact_form_action": "#",
+    "checklist_form_action": "#",
+    "apply_form_action": "#",
+    "copyright": "© 2026 Anmol Sharma. All rights reserved.",
+    "footer_tagline": "",
+    "footer_email": "",
+    "footer_phone": ""
+  },
+  "navigation_button": {
+    "enable": false,
+    "label": "",
+    "link": ""
+  },
+  "google_tag_manager": {
+    "enable": false,
+    "gtm_id": "GTM-XXXXXX"
+  },
+  "metadata": {
+    "meta_author": "Anmol Sharma",
+    "meta_image": "/images/og-image.png",
+    "meta_description": "Video editing, motion graphics and visual storytelling by Anmol Sharma."
+  }
+}

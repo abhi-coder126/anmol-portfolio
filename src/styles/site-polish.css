@@ -1,0 +1,22 @@
+:root {
+  --text-main: #f4f2ff;
+  --text-soft: #c9c4e0;
+  --accent: #b9a8ff;
+  --fs-h1: clamp(2.4rem, 5.5vw, 4.25rem);
+  --fs-h2: clamp(1.9rem, 3.8vw, 3rem);
+  --fs-body: clamp(1rem, 1.1vw, 1.0625rem);
+}
+
+section[id] h1 { font-size: var(--fs-h1); line-height: 1.08; color: var(--text-main); }
+section[id] h2 { font-size: var(--fs-h2); line-height: 1.15; color: var(--text-main); }
+section[id] p, section[id] li { font-size: var(--fs-body); line-height: 1.7; color: var(--text-soft); }
+.eyebrow { color: var(--accent) !important; letter-spacing: .14em; text-transform: uppercase; }
+.highlight, .hero-tagline { color: var(--accent) !important; }
+.reveal { opacity: 0; transform: translateY(28px); transition: opacity .7s ease, transform .7s ease; }
+.reveal.is-visible { opacity: 1; transform: none; }
+.info-card, .reel-card { transition: transform .3s ease, box-shadow .3s ease; }
+.info-card:hover, .reel-card:hover { transform: translateY(-6px); }
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+  .info-card:hover, .reel-card:hover { transform: none; }
+}

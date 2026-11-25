@@ -1,0 +1,86 @@
+---
+import Base from "@/layouts/Base.astro";
+import { getListPage } from "@/lib/contentParser.astro";
+import { markdownify } from "@/lib/utils/textConverter";
+// Testimonials intentionally hidden until real client feedback is available.
+import type { CaseStudy } from "@/types";
+import { reels as reelData } from "@/data/reels";
+
+const caseStudyList = await getListPage("caseStudy", "-index");
+const pageData: CaseStudy = caseStudyList.data;
+
+const reels = reelData.map(({ title, file }) => [title, file] as const);
+---
+
+<Base {...pageData}>
+  <!-- Page Header -->
+  <section class="section-ph pb-20 relative overflow-hidden">
+    <div class="container relative">
+      <div class="absolute top-0 left-0 w-full">
+        <div class="h-100 w-full overflow-hidden -translate-y-10">
+          <canvas class="heroSporeCanvas w-full"></canvas>
+        </div>
+      </div>
+      <div class="row justify-center">
+        <div class="mb-20 text-center relative">
+          <h1
+            class="mb-6 lg:col-9 mx-auto text-h3 lg:text-h1 hasHighlight"
+            set:html={markdownify(pageData.page_header!.title)}
+          />
+          <p class="mb-10 lg:col-6 mx-auto text-lg">
+            {pageData.page_header!.content}
+          </p>
+        </div>
+      </div>
+    </div>
+    <div
+      class="absolute left-1/2 top-0 -translate-y-1/2 -translate-x-1/2 size-160 xl:size-300 -z-20 blur-2xl"
+      style="background: radial-gradient(circle, var(--color-primary) 0%, color-mix(in srgb, var(--color-primary) 78%, transparent) 20%, transparent 70%);"
+    >
+    </div>
+  </section>
+  <hr
+    class="h-px bg-linear-to-r from-transparent from-10% via-white/50 to-90% to-transparent border-0"
+  />
+
+  <section class="section reels-section"><div class="container"><div class="section-intro centralize"><h2 class="title hasHighlight">Reel <strong>Edits</strong></h2><p class="subtitle">A selection of motion graphics, branded edits, real estate films and social-first video work.</p></div><div class="reels-grid">{reels.map(([title, src]) => <article class="reel-card"><div class="reel-frame"><video controls preload="metadata" playsinline aria-label={title}><source src={src} /></video><button class="reel-play" type="button" aria-label={`Play ${title}`}>▶</button></div></article>)}</div></div></section>
+
+  <!-- Testimonials intentionally hidden until real client feedback is available. -->
+
+  <!-- Call to Action -->
+</Base>
+
+<script>
+  document.querySelectorAll(".reel-frame").forEach((frame) => {
+    const video = frame.querySelector("video");
+    const btn = frame.querySelector(".reel-play");
+    if (!video || !btn) return;
+    video.removeAttribute("controls");
+    const show = () => btn.classList.remove("is-hidden");
+    const play = () => {
+      document.querySelectorAll<HTMLVideoElement>(".reel-frame video").forEach((v) => {
+        if (v !== video) v.pause();
+      });
+      video.play();
+    };
+    btn.addEventListener("click", play);
+    video.addEventListener("click", () => (video.paused ? play() : video.pause()));
+    video.addEventListener("play", () => btn.classList.add("is-hidden"));
+    video.addEventListener("pause", show);
+    video.addEventListener("ended", show);
+  });
+</script>
+
+<style>
+  .reels-section { padding-top: 3rem; }
+  .reels-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1.25rem; margin: 3.5rem auto 0; max-width: 1180px; }
+  .reel-card { min-width: 0; max-width: 200px; width: 100%; margin: auto; }
+  .reel-frame { position: relative; overflow: hidden; aspect-ratio: 9 / 16; border: 1px solid color-mix(in srgb, var(--color-text) 18%, transparent); border-radius: 1.35rem; background: #09090d; box-shadow: 0 16px 38px #0004; }
+  .reel-frame video { width: 100%; height: 100%; object-fit: cover; display: block; background: #050509; cursor: pointer; }
+  .reel-play { position: absolute; inset: 50% auto auto 50%; z-index: 2; width: 58px; height: 58px; transform: translate(-50%, -50%); border: 0; border-radius: 999px; background: var(--color-primary); color: #fff; font-size: 20px; padding-left: 4px; cursor: pointer; box-shadow: 0 8px 25px #0008; }
+  .reel-play:hover { transform: translate(-50%, -50%) scale(1.08); background: var(--color-primary-light); }
+  .reel-play.is-hidden { display: none; }
+  .reel-play { position: absolute; inset: 50% auto auto 50%; z-index: 3; display: grid; width: 58px; height: 58px; place-items: center; transform: translate(-50%, -50%); border-radius: 999px; background: var(--color-primary); color: white; box-shadow: 0 8px 25px #0008; transition: transform .2s ease, background .2s ease; }
+  .reel-play span { margin-left: 3px; font-size: 17px; }
+  .reel-play:hover { transform: translate(-50%, -50%) scale(1.1); background: var(--color-primary-light); }
+</style>

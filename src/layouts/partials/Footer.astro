@@ -1,0 +1,44 @@
+---
+import ImageMod from "@/layouts/components/ImageMod.astro";
+import Social from "@/layouts/components/Social.astro";
+import { site } from "@/data/site";
+---
+<footer class="site-footer section pb-0 relative overflow-hidden">
+  <div class="container pb-10">
+    <div class="flex lg:justify-between flex-wrap gap-x-10 gap-y-10">
+      <div class="max-w-95 mb-12 text-lg text-text">
+        <ImageMod src="/images/Fluxer-motion.png" width={150} height={72} class="h-16 object-contain object-left" alt={site.name} />
+        <p class="mt-6">{site.tagline}</p>
+        <p class="mt-4">Creating thoughtful edits and engaging visual experiences for brands, businesses and digital platforms.</p>
+        <a class="link mt-6 inline-block underline" href={site.whatsappLink}>{site.whatsapp}</a>
+        <a class="link mt-4 block" href={`mailto:${site.email}`}>{site.email}</a>
+      </div>
+    </div>
+  </div>
+  <hr class="h-px bg-linear-to-r from-transparent from-25% via-white/50 to-75% to-transparent border-0" />
+  <div class="container py-7 flex justify-between items-center gap-6 flex-wrap">
+    <p class="text-base text-text">© 2026 {site.name}. All rights reserved.</p>
+    <Social className="social-icons" source={[{ name: "instagram", icon: "FaInstagram", link: site.instagram }, { name: "whatsapp", icon: "FaWhatsapp", link: site.whatsappLink }]} />
+  </div>
+</footer>
+
+<style>
+  .site-footer{background:radial-gradient(circle at 15% 0%,#30206b 0%,#100c25 32%,#05050d 75%);border-top:1px solid #9b7cff44}
+  .site-footer::before{content:"";position:absolute;left:8%;top:-90px;width:260px;height:180px;border-radius:50%;background:#754cff44;filter:blur(70px);pointer-events:none}
+  .site-footer .container{position:relative;z-index:1}
+  .site-footer .max-w-95{padding:1.5rem 1.75rem;border:1px solid #a990ff35;border-radius:1.35rem;background:#ffffff08;box-shadow:0 20px 50px #0005,inset 0 1px #ffffff12}
+  .site-footer .max-w-95 img{filter:drop-shadow(0 0 14px #9d7cff77)}
+  .site-footer .max-w-95 p{color:#d7cff5;line-height:1.7}
+  .site-footer .link{color:#fff;font-weight:600;transition:color .2s ease,text-shadow .2s ease}
+  .site-footer .link:hover{color:#b59dff;text-shadow:0 0 14px #8d68ff}
+  .site-footer .footer-label{margin:1.5rem 0 1.5rem;color:#c9b7ff;font-size:.8rem;letter-spacing:.14em;text-transform:uppercase}
+  .site-footer .footer-link{color:#eee9ff;transition:color .2s ease,transform .2s ease;display:inline-block}
+  .site-footer .footer-link:hover{color:#aa8cff;transform:translateX(5px)}
+  .site-footer hr{opacity:.45}
+  .site-footer .social-icons{gap:.75rem}
+  .site-footer .social-icons a{display:grid;width:44px;height:44px;place-items:center;border:1px solid #a990ff45;border-radius:50%;background:#ffffff0a;color:#e9e1ff;transition:transform .25s ease,background .25s ease,color .25s ease,box-shadow .25s ease}
+  .site-footer .social-icons a:hover{transform:translateY(-4px);background:#7b58e9;color:#fff;box-shadow:0 0 22px #825dff88}
+  @media(max-width:640px){.site-footer .max-w-95{width:100%;margin-bottom:0}.site-footer .container.py-7{justify-content:center;text-align:center}.site-footer .footer-label{margin-top:0}}
+  .site-footer{padding-top:3rem;text-align:center}.site-footer .container.pb-10{max-width:760px;padding-bottom:2.5rem}.site-footer .container.pb-10>div{display:flex;justify-content:center!important}.site-footer .max-w-95{max-width:620px;margin:0 auto;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;text-align:center!important}.site-footer .max-w-95 img{display:block;height:4rem;width:auto;margin:0 auto;object-position:center}.site-footer .max-w-95 p,.site-footer .max-w-95 .link{font-size:.9rem;text-align:center!important}.site-footer .max-w-95 .link{display:block}.site-footer hr{max-width:900px;margin:0 auto}.site-footer .container.py-7{max-width:900px;padding-top:1.25rem;padding-bottom:1.25rem;justify-content:center!important;align-items:center!important;flex-direction:column}.site-footer .container.py-7 p{font-size:.8rem;text-align:center}.site-footer .social-icons{justify-content:center!important;align-items:center}@media(max-width:640px){.site-footer{padding-top:2.5rem}.site-footer .max-w-95{max-width:100%}.site-footer .container.pb-10{padding-bottom:2rem}}
+  :global(.site-footer .max-w-95 img){display:block!important;height:4rem;width:auto;margin:0 auto!important;object-position:center}
+</style>

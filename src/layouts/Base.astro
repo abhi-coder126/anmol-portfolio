@@ -1,0 +1,181 @@
+---
+import config from "@/config/config.json";
+import theme from "@/config/theme.json";
+import { plainify } from "@/lib/utils/textConverter";
+import Footer from "@/partials/Footer.astro";
+import Header from "@/partials/Header.astro";
+import { site } from "@/data/site";
+import "@/styles/main.css";
+import "../styles/site-polish.css";
+import { Font } from "astro:assets";
+import {
+  GoogleTagmanager,
+  GoogleTagmanagerNoscript,
+} from "@digi4care/astro-google-tagmanager";
+
+const fontEntries = Object.entries(theme.fonts.font_family).filter(
+  ([key]) => !key.includes("_type"),
+);
+
+export interface Props {
+  title?: string;
+  meta_title?: string;
+  description?: string;
+  image?: string;
+  noindex?: boolean;
+  canonical?: string;
+}
+
+const { title, meta_title, description, image, noindex, canonical } =
+  Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- google tag manager -->
+    {
+      config.google_tag_manager.enable && (
+        <GoogleTagmanager id={config.google_tag_manager.gtm_id} />
+      )
+    }
+    <link rel="shortcut icon" href={config.site.favicon} />
+    <meta name="theme-name" content="anmol-sharma-portfolio" />
+    <meta name="msapplication-TileColor" content="#000000" />
+    <meta
+      name="theme-color"
+      media="(prefers-color-scheme: light)"
+      content="#fff"
+    />
+    <meta
+      name="theme-color"
+      media="(prefers-color-scheme: dark)"
+      content="#000"
+    />
+    <meta name="generator" content={Astro.generator} />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+    {
+      fontEntries.map(([key]) => {
+        const cssVar = `--font-${key}` as any;
+        return <Font cssVariable={cssVar} preload />;
+      })
+    }
+
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=5"
+    />
+
+    <title>
+      {plainify(meta_title ? meta_title : title ? title : site.name)}
+    </title>
+
+    {canonical && <link rel="canonical" href={canonical} item-prop="url" />}
+    {noindex && <meta name="robots" content="noindex,nofollow" />}
+    <meta
+      name="description"
+      content={plainify(
+        description ? description : `${site.tagline} by ${site.name}.`,
+      )}
+    />
+
+    <!-- View Transitions removed to avoid conflicts with GSAP/Lenis/Swiper -->
+
+    <meta name="author" content={config.metadata.meta_author} />
+    <meta
+      property="og:title"
+      content={plainify(
+        meta_title ? meta_title : title ? title : site.name,
+      )}
+    />
+    <meta
+      property="og:description"
+      content={plainify(
+        description ? description : `${site.tagline} by ${site.name}.`,
+      )}
+    />
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:url"
+      content={`${config.site.base_url}/${Astro.url.pathname.replace("/", "")}`}
+    />
+    <meta
+      name="twitter:title"
+      content={plainify(
+        meta_title ? meta_title : title ? title : site.name,
+      )}
+    />
+    <meta
+      name="twitter:description"
+      content={plainify(
+        description ? description : `${site.tagline} by ${site.name}.`,
+      )}
+    />
+    <meta
+      property="og:image"
+      content={`${config.site.base_url}${
+        image ? image : config.metadata.meta_image
+      }`}
+    />
+    <meta
+      name="twitter:image"
+      content={`${config.site.base_url}${
+        image ? image : config.metadata.meta_image
+      }`}
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- GSAP CDN -->
+    <script
+      is:inline
+      defer
+      src="https://cdn.jsdelivr.net/npm/gsap@3.14.1/dist/gsap.min.js"></script>
+    <script
+      is:inline
+      defer
+      src="https://cdn.jsdelivr.net/npm/gsap@3.14.1/dist/ScrollTrigger.min.js"
+    ></script>
+
+    <!-- LENIS CDN -->
+    <script
+      is:inline
+      defer
+      src="https://unpkg.com/lenis@1.3.17/dist/lenis.min.js"></script>
+
+    <!-- Main UI interactions -->
+    <script is:inline defer src="/scripts/main.js"></script>
+
+    <!-- Animations (Modules are deferred automatically by browsers) -->
+    <script is:inline type="module" src="/scripts/animations.js"></script>
+  </head>
+  <body>
+    {/* google tag manager noscript */}
+    {
+      config.google_tag_manager.enable && (
+        <GoogleTagmanagerNoscript id={config.google_tag_manager.gtm_id} />
+      )
+    }
+
+    {/* <TwSizeIndicator /> */}
+    <Header />
+    <main id="main-content" class="overflow-x-hidden">
+      <slot />
+    </main>
+    <div class="quick-contact" aria-label="Quick contact">
+      <a class="quick-contact__button quick-contact__call" href="tel:+919816480267" aria-label="Call Anmol Sharma"><span aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.6 2.8 9.2 2c.7-.2 1.4.2 1.7.9l1.2 2.9c.2.5.1 1.1-.3 1.5L10.3 8.8c1 2 2.6 3.6 4.6 4.6l1.5-1.5c.4-.4 1-.5 1.5-.3l2.9 1.2c.7.3 1.1 1 .9 1.7l-.8 2.6c-.2.7-.8 1.1-1.5 1.1C10.2 18.2 5.8 13.8 5.8 4.3c0-.7.4-1.3 1.1-1.5Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><b>Call</b></a>
+      <a class="quick-contact__button quick-contact__whatsapp" href={site.whatsappLink} target="_blank" rel="noopener noreferrer" aria-label="Chat on WhatsApp"><span aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 11.5a8.2 8.2 0 0 1-12.2 7.1L4 20l1.4-3.6A8.2 8.2 0 1 1 20 11.5Z" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8.5 8.7c.2-.4.4-.4.7-.4h.5c.2 0 .4.1.5.4l.6 1.4c.1.2.1.4-.1.6l-.5.6c.5.9 1.2 1.6 2.1 2.1l.6-.5c.2-.2.4-.2.6-.1l1.4.6c.3.1.4.3.4.5v.5c0 .3 0 .5-.4.7-.4.2-.9.3-1.3.1-2.7-.8-4.8-2.9-5.6-5.6-.2-.4-.1-.9.1-1.3Z" fill="currentColor"/></svg></span><b>WhatsApp</b></a>
+    </div>
+    <Footer />
+    <script is:inline src="/js/site-animations.js" defer></script>
+  </body>
+</html>
+
+<style>
+  :global(html),:global(body){max-width:100%;overflow-x:hidden}
+  :global(body){overscroll-behavior-x:none}
+</style>
+
+<style>
+  .quick-contact{position:fixed;z-index:60;right:1rem;bottom:1rem;display:flex;flex-direction:column;gap:.7rem}.quick-contact__button{position:relative;display:grid;place-items:center;width:48px;height:48px;padding:0;border:0;border-radius:50%;color:#fff;box-shadow:0 6px 16px #0004;transition:transform .2s ease,box-shadow .2s ease}.quick-contact__button::before{content:"";position:absolute;inset:-6px;border:2px solid #a78bfa;border-radius:50%;animation:contact-pulse 1.8s ease-out infinite;pointer-events:none}.quick-contact__button:hover{transform:scale(1.08);box-shadow:0 10px 20px #0006}.quick-contact__button span{display:grid;place-items:center;width:100%;height:100%;border-radius:50%;flex:none}.quick-contact__button svg{width:1.5rem;height:1.5rem}.quick-contact__button b{display:none}.quick-contact__call{order:2;background:var(--color-primary);color:#fff}.quick-contact__call span{background:var(--color-primary)}.quick-contact__call::before{border-color:#a78bfa}.quick-contact__whatsapp{order:1;background:#12a84f;color:#fff}.quick-contact__whatsapp span{background:#12a84f}.quick-contact__whatsapp::before{border-color:#4ade80;animation-delay:.6s}@keyframes contact-pulse{0%{transform:scale(.9);opacity:.9}70%,100%{transform:scale(1.28);opacity:0}}@media(max-width:600px){.quick-contact{right:.7rem;bottom:.7rem}.quick-contact__button{width:44px;height:44px}.quick-contact__button svg{width:1.35rem;height:1.35rem}}
+</style>
